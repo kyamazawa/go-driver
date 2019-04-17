@@ -121,3 +121,7 @@ func (r *httpVPackResponseElement) ParseBody(field string, result interface{}) e
 func (r *httpVPackResponseElement) ParseArrayBody() ([]driver.Response, error) {
 	return nil, driver.WithStack(driver.InvalidArgumentError{Message: "ParseArrayBody not allowed"})
 }
+
+func (r *httpVPackResponseElement) ParseLoggerBody() ([]driver.Response, error) {
+	return nil, driver.WithStack(driver.InvalidArgumentError{Message: "ParseLoggerBody not allowed"})
+}

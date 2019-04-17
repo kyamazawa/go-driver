@@ -106,6 +106,8 @@ type Response interface {
 	// ParseArrayBody performs protocol specific unmarshalling of the response array data into individual response objects.
 	// This can only be used for requests that return an array of objects.
 	ParseArrayBody() ([]Response, error)
+
+	ParseLoggerBody() ([]Response, error)
 }
 
 // RawObject is a raw encoded object.

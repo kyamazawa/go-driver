@@ -139,6 +139,10 @@ func (r *httpVPackResponse) ParseArrayBody() ([]driver.Response, error) {
 	return r.bodyArray, nil
 }
 
+func (r *httpVPackResponse) ParseLoggerBody() ([]driver.Response, error) {
+	return nil, driver.WithStack(driver.InvalidArgumentError{Message: "ParseLoggerBody not allowed"})
+}
+
 // getSlice reads the slice from the response if needed.
 func (r *httpVPackResponse) getSlice() (velocypack.Slice, error) {
 	if r.slice == nil {

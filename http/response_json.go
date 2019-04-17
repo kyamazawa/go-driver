@@ -23,8 +23,11 @@
 package http
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -116,6 +119,26 @@ func (r *httpJSONResponse) ParseArrayBody() ([]driver.Response, error) {
 		resps[i] = &httpJSONResponseElement{bodyObject: x}
 	}
 	return resps, nil
+}
+
+func (r *httpJSONResponse) ParseLoggerBody() ([]driver.Response, error) {
+	reader := bufio.NewReader(bytes.NewReader(r.rawResponse))
+	messages := make([]map[string]*json.RawMessage, 0)
+	for {
+		line, _, err := reader.ReadLine()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, driver.WithStack(err)
+		}
+		var msg map[string]*json.RawMessage
+		if err := json.Unmarshal(line, &msg); err != nil {
+			return nil, driver.WithStack(err)
+		}
+		messages = append(messages, msg)
+	}
+	r.bodyArray = messages
+	return r.ParseArrayBody()
 }
 
 func parseBody(bodyObject map[string]*json.RawMessage, field string, result interface{}) error {

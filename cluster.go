@@ -120,6 +120,48 @@ type DatabaseInventory struct {
 	Views []InventoryView `json:"views,omitempty"`
 }
 
+type ReplicationState struct {
+	State   State        `json:"state,omitempty"`
+	Server  ServerInfo   `json:"server,omitempty"`
+	Clients []ClientInfo `json:"clients,omitempty"`
+}
+
+type State struct {
+	Running                bool   `json:"running,omitempty"`
+	LastLogTick            string `json:"lastLogTick,omitempty"`
+	LastUncommittedLogTick string `json:"lastUncommittedLogTick,omitempty"`
+	TotalEvents            int64  `json:"totalEvents,omitempty"`
+	Time                   string `json:"time,omitempty"`
+}
+
+type ServerInfo struct {
+	Version  Version    `json:"version,omitempty"`
+	ServerID ServerID   `json:"serverId,omitempty"`
+	Engine   EngineType `json:"engine,omitempty"`
+}
+
+type ClientInfo struct {
+	ServerID       ServerID `json:"serverId,omitempty"`
+	Time           string   `json:"time,omitempty"`
+	Expires        string   `json:"expires,omitempty"`
+	LastServedTick string   `json:"lastServedTick,omitempty"`
+}
+
+type ReplicationFollow struct {
+	LastLogTick string
+	Events      []Event
+}
+
+type Event struct {
+	Tick     string                 `json:"tick,omitempty"`
+	Type     int64                  `json:"type,omitempty"`
+	Database string                 `json:"database,omitempty"`
+	TID      string                 `json:"tid,omitempty"`
+	CID      string                 `json:"cid,omitempty"`
+	CName    string                 `json:"cname,omitempty"`
+	Data     map[string]interface{} `json:"data,omitempty"`
+}
+
 // IsReady returns true if the IsReady flag of all collections is set.
 func (i DatabaseInventory) IsReady() bool {
 	for _, c := range i.Collections {

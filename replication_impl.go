@@ -96,6 +96,54 @@ func (c *client) DatabaseInventory(ctx context.Context, db Database) (DatabaseIn
 	return result, nil
 }
 
+func (c *client) State(ctx context.Context, db Database) (ReplicationState, error) {
+	req, err := c.conn.NewRequest("GET", path.Join("_db", db.Name(), "_api/replication/logger-state"))
+	if err != nil {
+		return ReplicationState{}, WithStack(err)
+	}
+	resp, err := c.conn.Do(ctx, req)
+	if err != nil {
+		return ReplicationState{}, WithStack(err)
+	}
+	if err := resp.CheckStatus(200); err != nil {
+		return ReplicationState{}, WithStack(err)
+	}
+	var result ReplicationState
+	if err := resp.ParseBody("", &result); err != nil {
+		return ReplicationState{}, WithStack(err)
+	}
+	return result, nil
+}
+
+func (c *client) Follow(ctx context.Context, db Database, lastLogTick string) (ReplicationFollow, error) {
+	req, err := c.conn.NewRequest("GET", path.Join("_db", db.Name(), "_api/replication/logger-follow"))
+	if err != nil {
+		return ReplicationFollow{}, WithStack(err)
+	}
+	req = req.SetQuery("from", lastLogTick)
+	resp, err := c.conn.Do(ctx, req)
+	if err != nil {
+		return ReplicationFollow{}, WithStack(err)
+	}
+	if err := resp.CheckStatus(200, 204); err != nil {
+		return ReplicationFollow{}, WithStack(err)
+	}
+	responses, err := resp.ParseLoggerBody()
+	if err != nil {
+		return ReplicationFollow{}, WithStack(err)
+	}
+	respLastLogTick := resp.Header("x-arango-replication-lastincluded")
+	events := make([]Event, 0)
+	for _, r := range responses {
+		var event Event
+		if err := r.ParseBody("", &event); err != nil {
+			return ReplicationFollow{}, WithStack(err)
+		}
+		events = append(events, event)
+	}
+	return ReplicationFollow{LastLogTick: respLastLogTick, Events: events}, nil
+}
+
 // BatchID reported by the server
 func (b batchMetadata) BatchID() string {
 	return b.ID

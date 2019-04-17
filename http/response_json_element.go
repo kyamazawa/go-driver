@@ -111,3 +111,7 @@ func (r *httpJSONResponseElement) ParseBody(field string, result interface{}) er
 func (r *httpJSONResponseElement) ParseArrayBody() ([]driver.Response, error) {
 	return nil, driver.WithStack(driver.InvalidArgumentError{Message: "ParseArrayBody not allowed"})
 }
+
+func (r *httpJSONResponseElement) ParseLoggerBody() ([]driver.Response, error) {
+	return nil, driver.WithStack(driver.InvalidArgumentError{Message: "ParseLoggerBody not allowed"})
+}

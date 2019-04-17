@@ -53,4 +53,8 @@ type Replication interface {
 	// When this function is called on a coordinator is a cluster, an ID of a DBServer must be provided
 	// using a context that is prepare with `WithDBServerID`.
 	DatabaseInventory(ctx context.Context, db Database) (DatabaseInventory, error)
+
+	State(ctx context.Context, db Database) (ReplicationState, error)
+
+	Follow(ctx context.Context, db Database, lastLogTick string) (ReplicationFollow, error)
 }
