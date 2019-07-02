@@ -126,19 +126,24 @@ func (r *httpJSONResponse) ParseArrayBody() ([]driver.Response, error) {
 func (r *httpJSONResponse) ParseLoggerBody() ([]driver.Response, error) {
 	reader := bufio.NewReader(bytes.NewReader(r.rawResponse))
 	messages := make([]map[string]*json.RawMessage, 0)
+	buf := make([]byte, 0)
 	for {
-		line, _, err := reader.ReadLine()
+		line, isPrefix, err := reader.ReadLine()
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			return nil, driver.WithStack(err)
 		}
-		var msg map[string]*json.RawMessage
-		if err := json.Unmarshal(line, &msg); err != nil {
-			log.Printf("ParseLoggerBody: %s\n", line)
-			return nil, driver.WithStack(err)
+		buf = append(buf, line...)
+		if !isPrefix {
+			var msg map[string]*json.RawMessage
+			if err := json.Unmarshal(buf, &msg); err != nil {
+				log.Printf("ParseLoggerBody: %s\n", line)
+				return nil, driver.WithStack(err)
+			}
+			messages = append(messages, msg)
+			buf = buf[:0]
 		}
-		messages = append(messages, msg)
 	}
 	r.bodyArray = messages
 	return r.ParseArrayBody()
