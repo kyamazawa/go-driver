@@ -28,6 +28,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -110,6 +111,7 @@ func (r *httpJSONResponse) ParseArrayBody() ([]driver.Response, error) {
 	if r.bodyArray == nil {
 		var bodyArray []map[string]*json.RawMessage
 		if err := json.Unmarshal(r.rawResponse, &bodyArray); err != nil {
+			log.Printf("ParseArrayBody: %s\n", r.rawResponse)
 			return nil, driver.WithStack(err)
 		}
 		r.bodyArray = bodyArray
@@ -133,6 +135,7 @@ func (r *httpJSONResponse) ParseLoggerBody() ([]driver.Response, error) {
 		}
 		var msg map[string]*json.RawMessage
 		if err := json.Unmarshal(line, &msg); err != nil {
+			log.Printf("ParseLoggerBody: %s\n", line)
 			return nil, driver.WithStack(err)
 		}
 		messages = append(messages, msg)
